@@ -18,6 +18,8 @@ exports.router = (function() {
 
     apiRouter.route('/users/id/').get(usersController.getUserById);
     apiRouter.route('/users/all/').get(usersController.getAllUsers);
+    
+    apiRouter.route('/users/deleteUser/').post(usersController.deleteUser);
 
 
     return apiRouter

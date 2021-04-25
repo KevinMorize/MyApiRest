@@ -258,4 +258,43 @@ module.exports = {
     });
   },
 
+  deleteUser: function (req, res) {
+
+    var headerAuth = req.headers['authorization'];
+    var userId = jwtUtils.getUserId(headerAuth);
+
+    asyncLib.waterfall([
+      function(done) {
+        models.User.findOne({
+            where: { id: userId }
+        }).then(function (userFound) {
+            done(null, userFound);
+        }).catch(function(err) {
+            console.log(err)
+            return res.status(500).json({ 'error': 'unable to verify user' });
+        });
+      },
+
+      function(userFound, done) {
+        if(userFound) {
+            userFound.destroy({
+            }).then(function() {
+                done(userFound);
+            }).catch(function(err) {
+                res.status(500).json({ 'error': 'cannot update user' });
+            });
+        } else {
+            res.status(404).json({ 'error': 'user not found' });
+        }
+        },
+      ], 
+        
+      function(userFound) {
+          if (userFound) {
+              return res.status(200).json({ 'message': 'User successfully delete' });
+          } else {
+              return res.status(500).json({ 'error': 'cannot delete user profile' });
+          }
+      });
+  },
 }
