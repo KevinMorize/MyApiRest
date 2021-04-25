@@ -2,21 +2,21 @@
   "development": {
     "username": "root",
     "password": "root",
-    "database": "database_development_api",
+    "database": "development_api",
     "host": "localhost",
     "dialect": "mysql"
   },
   "test": {
     "username": "root",
     "password": "root",
-    "database": "database_test_api",
+    "database": "test_api",
     "host": "localhost",
     "dialect": "mysql"
   },
   "production": {
     "username": "root",
     "password": "root",
-    "database": "database_production_api",
+    "database": "production_api",
     "host": "localhost",
     "dialect": "mysql"
   }

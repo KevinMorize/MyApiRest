@@ -14,20 +14,29 @@ module.exports = {
 
         // params
         var email = req.body.email;
-        var username = req.body.username;
         var password = req.body.password;
+        var firstName = req.body.firstName;
+        var lastName = req.body.lastName;
         var bio = req.body.bio;
+        var isAdmin = req.body.isAdmin
 
         if (email == null) {
             return res.status(400).json({ 'error': 'missing email' });
-        } else if (username == null) {
-            return res.status(400).json({ 'error': 'missing username' });
         } else if (password == null) {
             return res.status(400).json({ 'error': 'missing password' });
+        } else if (firstName == null) {
+            return res.status(400).json({ 'error': 'missing first name' });
+        } else if (lastName == null) {
+            return res.status(400).json({ 'error': 'missing last name' });
         }
 
-        if (username.length >= 13 || username.length <= 4) {
-            return res.status(400).json({ 'error': 'wrong username (must be length 5 - 12)' });
+
+        if (firstName.length >= 13 || firstName.length <= 3) {
+            return res.status(400).json({ 'error': 'First name length must be included between 3 and 13' });
+        }
+
+        if (lastName.length >= 13 || lastName.length <= 3) {
+          return res.status(400).json({ 'error': 'Last name length must be included between 3 and 13' });
         }
 
         if (!EMAIL_REGEX.test(email)) {
@@ -40,6 +49,7 @@ module.exports = {
 
         // verify var
         asyncLib.waterfall([
+
             function(done) {
               models.User.findOne({
                 attributes: ['email'],
@@ -52,6 +62,7 @@ module.exports = {
                 return res.status(500).json({ 'error': 'unable to verify user' });
               });
             },
+
             function(userFound, done) {
               if (!userFound) {
                 bcrypt.hash(password, 5, function( err, bcryptedPassword ) {
@@ -61,13 +72,15 @@ module.exports = {
                 return res.status(409).json({ 'error': 'user already exist' });
               }
             },
+
             function(userFound, bcryptedPassword, done) {
               var newUser = models.User.create({
                 email: email,
-                username: username,
                 password: bcryptedPassword,
+                firstName: firstName,
+                lastName : lastName,
                 bio: bio,
-                isAdmin: 0
+                isAdmin: 0,
               })
               .then(function(newUser) {
                 done(newUser);
@@ -79,7 +92,7 @@ module.exports = {
           ], function(newUser) {
             if (newUser) {
               return res.status(201).json({
-                'userId': newUser.id
+                'message': 'User successfully created'
               });
             } else {
               return res.status(500).json({ 'error': 'cannot add user' });
