@@ -160,7 +160,7 @@ module.exports = {
             return res.status(400).json({ 'error': 'wrong token' });
         
         models.User.findOne({
-            attributes: [ 'id', 'email', 'username', 'bio' ],
+            attributes: [ 'id', 'email', 'firstName', 'lastName', 'bio' ],
              where: { id: userId }
         }).then(function(user) {
             if (user) {
@@ -179,23 +179,28 @@ module.exports = {
         var userId = jwtUtils.getUserId(headerAuth);
         
         // Params
+        var firstName = req.body.firstName;
+        var lastName = req.body.lastName;
         var bio = req.body.bio;
         
         asyncLib.waterfall([
             function(done) {
             models.User.findOne({
-                attributes: ['id', 'bio'],
+                attributes: ['id', 'firstName', 'lastName', 'bio'],
                 where: { id: userId }
             }).then(function (userFound) {
                 done(null, userFound);
             }).catch(function(err) {
+                console.log(err)
                 return res.status(500).json({ 'error': 'unable to verify user' });
             });
         },
             function(userFound, done) {
             if(userFound) {
                 userFound.update({
-                bio: (bio ? bio : userFound.bio)
+                bio: (bio ? bio : userFound.bio),
+                firstName : (firstName ? firstName : userFound.firstName),
+                lastName : (lastName ? lastName : userFound.lastName)
                 }).then(function() {
                     done(userFound);
                 }).catch(function(err) {
@@ -207,10 +212,50 @@ module.exports = {
             },
         ], function(userFound) {
             if (userFound) {
-                return res.status(201).json(userFound);
+                return res.status(200).json({ 'message': 'User successfully updated' });
             } else {
                 return res.status(500).json({ 'error': 'cannot update user profile' });
             }
         });
-    }
+    },
+
+    getUserById: function(req, res) {
+
+      var userId = req.body.idUser;
+      
+      if (userId == null)
+      return res.status(400).json({ 'error': 'Missing argument' });
+
+      if (userId <= 0)
+          return res.status(400).json({ 'error': 'User id must be > 0' });
+      
+      models.User.findOne({
+          attributes: [ 'id', 'email', 'firstName', 'lastName', 'bio', 'isAdmin' ],
+           where: { id: userId }
+      }).then(function(user) {
+          if (user) {
+          res.status(201).json(user);
+          } else {
+              res.status(404).json({ 'error': 'User not found' });
+          }
+      }).catch(function(err) {
+          res.status(500).json({ 'error': 'cannot fetch user' });
+      });
+  },
+
+  getAllUsers: function(req, res) {
+    
+    models.User.findAll({
+        attributes: [ 'id', 'email', 'firstName', 'lastName', 'bio', 'isAdmin' ]
+    }).then(function(user) {
+        if (user) {
+        res.status(201).json(user);
+        } else {
+            res.status(404).json({ 'error': 'No user found' });
+        }
+    }).catch(function(err) {
+        res.status(500).json({ 'error': 'cannot fetch user' });
+    });
+  },
+
 }
