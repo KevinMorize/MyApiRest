@@ -16,10 +16,11 @@ exports.router = (function() {
     apiRouter.route('/users/me/').get(usersController.getUserProfile);
     apiRouter.route('/users/me/').put(usersController.updateUserProfile);
 
-    apiRouter.route('/users/id/').get(usersController.getUserById);
+    apiRouter.route('/user/:id/').get(usersController.getUserById);
+    apiRouter.route('/users/delete/:id').post(usersController.deleteUser);
+
     apiRouter.route('/users/all/').get(usersController.getAllUsers);
     
-    apiRouter.route('/users/deleteUser/').post(usersController.deleteUser);
 
 
     return apiRouter
