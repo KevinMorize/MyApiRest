@@ -7,6 +7,7 @@ var jwtUtils = require ('../utils/jwt.utils');
 // constants
 const TITLE_LIMIT = 2;
 const CONTENT_LIMIT = 4;
+const ITEMS_LIMIT = 50;
 
 //routes
 module.exports = {
@@ -46,7 +47,7 @@ module.exports = {
                         UserId : userFound.id
                     })
                     .then(function(newMessage){
-                        done(null, userFound, newMessage);
+                        done(newMessage);
                     })
                 } else {
                     res.status(404).json({ 'error': 'user not found' });
@@ -54,12 +55,42 @@ module.exports = {
             }
 
         ], function(newMessage) {
-
+            if (newMessage) {
+                return res.status(201).json(newMessage);
+            } else {
+                return res.status(500).json({ 'error': 'cannot post message' });
+            }
         });
-
     },
 
-    listMessages: function (req, res){
-
-    }
+    listMessages: function(req, res) {
+        var fields  = req.query.fields;
+        var limit   = parseInt(req.query.limit);
+        var offset  = parseInt(req.query.offset);
+        var order   = req.query.order;
+    
+        if (limit > ITEMS_LIMIT) {
+          limit = ITEMS_LIMIT;
+        }
+    
+        models.Message.findAll({
+          order: [(order != null) ? order.split(':') : ['title', 'ASC']],
+          attributes: (fields !== '*' && fields != null) ? fields.split(',') : null,
+          limit: (!isNaN(limit)) ? limit : null,
+          offset: (!isNaN(offset)) ? offset : null,
+          include: [{
+            model: models.User,
+            attributes: [ 'firstName', 'lastName' ]
+          }]
+        }).then(function(messages) {
+          if (messages) {
+            res.status(200).json(messages);
+          } else {
+            res.status(404).json({ "error": "no messages found" });
+          }
+        }).catch(function(err) {
+          console.log(err);
+          res.status(500).json({ "error": "invalid fields" });
+        });
+      }
 }
