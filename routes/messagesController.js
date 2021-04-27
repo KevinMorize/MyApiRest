@@ -74,7 +74,7 @@ module.exports = {
         }
     
         models.Message.findAll({
-          order: [(order != null) ? order.split(':') : ['title', 'ASC']],
+          order: [(order != null) ? order.split(':') : ['title', 'ASC', 'DESC']],
           attributes: (fields !== '*' && fields != null) ? fields.split(',') : null,
           limit: (!isNaN(limit)) ? limit : null,
           offset: (!isNaN(offset)) ? offset : null,

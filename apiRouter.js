@@ -3,7 +3,7 @@
 var express = require('express');
 var usersController = require('./routes/usersController');
 var messagesController = require('./routes/messagesController');
-// var likesController    = require('./routes/likesController');
+var likesController = require('./routes/likesController');
 
 
 // router
@@ -25,6 +25,9 @@ exports.router = (function() {
     apiRouter.route('/messages/new/').post(messagesController.createMessage);
     apiRouter.route('/messages/').get(messagesController.listMessages);
 
+    // likes
+    apiRouter.route('/messages/vote/:messageId/like').post(likesController.likePost);
+    apiRouter.route('/messages/vote/:messageId/dislike').post(likesController.dislikePost);
 
     return apiRouter
 

@@ -279,6 +279,7 @@ module.exports = {
               }).then(function() {
                   done(userFound);
               }).catch(function(err) {
+                console.log(err)
                   res.status(500).json({ 'error': 'cannot delete user' });
               });
           } else {
